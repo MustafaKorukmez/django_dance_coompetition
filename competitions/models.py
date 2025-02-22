@@ -19,7 +19,7 @@ class BaseTimestampedModel(models.Model):
     updated_at = models.DateTimeField(auto_now=True, verbose_name=_("Güncelleme Tarihi"))
 
     class Meta:
-        abstract = True
+        abstract = True  # Bu model soyut olduğu için veritabanında tablo oluşturulmaz.
 
 
 class CompetitionStatus(models.TextChoices):
@@ -58,38 +58,43 @@ class Competition(BaseTimestampedModel):
 
     def advance_round(self, from_round_number):
         """
-        Belirli bir turu kapatıp, pass_count kadar katılımcıyı bir sonraki tura taşı.
-        Eğer katılımcı zaten sonraki tura eklenmişse get_or_create ile tekrar eklemez.
+        Belirli bir turu kapatıp, pass_count kadar katılımcıyı bir sonraki tura taşır.
+        Eğer katılımcı zaten sonraki tura eklenmişse, tekrar eklenmez.
         """
         from_round = self.rounds.filter(round_number=from_round_number).first()
         if not from_round:
-            return  # Tur bulunamadı
+            return
         
         to_round_number = from_round_number + 1
         to_round = self.rounds.filter(round_number=to_round_number).first()
         if not to_round:
-            return  # Sonraki tur bulunamadı
+            return
 
         for group in from_round.groups.all():
-            # RoundParticipation kayıtlarını puanlarına göre sırala
             round_participations = group.round_participations.all()
             sorted_by_score = sorted(
-                round_participations, 
+                round_participations,
                 key=lambda rp: rp.scores.first().ranking if rp.scores.exists() else 9999
             )
             passed_participants = sorted_by_score[:from_round.pass_count]
-            
-            # İlk grup veya en az dolu grubu seçme mantığı (örnek: ilk grup)
+
             if to_round.groups.exists():
                 target_group = to_round.groups.first()
                 for rp in passed_participants:
-                    # Aynı katılımcı zaten eklenmişse tekrardan eklememek için get_or_create kullanıyoruz.
                     RoundParticipation.objects.get_or_create(
                         participant=rp.participant,
                         round=to_round,
                         defaults={"group": target_group}
                     )
-        # İlgili turda pass_count kadar katılımcı sonraki tura taşınmış olur.
+
+    def get_final_results(self):
+        """
+        Yarışmanın final sıralamasını döner.
+        Final sıralaması, ilgili CompetitionParticipation kayıtlarının
+        final_position alanında saklanır.
+        """
+        return self.competition_participations.filter(final_position__isnull=False).order_by("final_position")
+
 
 class Round(BaseTimestampedModel):
     """
@@ -111,7 +116,7 @@ class Round(BaseTimestampedModel):
         validators=[MinValueValidator(1)]
     )
     pass_count = models.PositiveIntegerField(
-        _("Her Gruptan bir sonraki tura kaç kişi geçsin,?"),
+        _("Bir Sonraki Tura Geçecek Kişi Sayısı"),
         validators=[MinValueValidator(1)]
     )
     is_last_round = models.BooleanField(_("Bu Tur Final Mi?"), default=False)
@@ -127,10 +132,6 @@ class Round(BaseTimestampedModel):
         return f"{self.competition.name} - {display_name}"
 
     def create_groups_automatically(self):
-        """
-        Bu tur için group_count kadar Group oluşturur.
-        Gruplara isim verirken A, B, C... şeklinde ilerler.
-        """
         existing_groups_count = self.groups.count()
         if existing_groups_count >= self.group_count:
             return
@@ -188,11 +189,6 @@ class Participant(BaseTimestampedModel):
     full_name = models.CharField(_("Ad Soyad"), max_length=150, db_index=True)
     email = models.EmailField(_("E-Posta"), blank=True, null=True)
     active = models.BooleanField(_("Aktif Katılımcı"), default=True)
-    final_position = models.PositiveIntegerField(
-        _("Final Sıralaması"),
-        null=True, blank=True,
-        help_text=_("Bu katılımcı yarışmayı kaçıncı bitirdi? (Opsiyonel)")
-    )
 
     def __str__(self):
         return self.full_name
@@ -201,7 +197,7 @@ class Participant(BaseTimestampedModel):
 class CompetitionParticipation(BaseTimestampedModel):
     """
     Katılımcının belirli bir yarışmaya kaydını tutar.
-    Kayıt anında, otomatik olarak yarışmanın 1. turuna eklemek için sinyal kullanılır.
+    Final sıralaması her yarışmaya özgü olarak burada saklanır.
     """
     participant = models.ForeignKey(
         Participant,
@@ -217,6 +213,11 @@ class CompetitionParticipation(BaseTimestampedModel):
     )
     joined_at = models.DateTimeField(
         _("Yarışmaya Katılım Tarihi"), auto_now_add=True
+    )
+    final_position = models.PositiveIntegerField(
+        _("Final Sıralaması"),
+        null=True, blank=True,
+        help_text=_("Bu yarışmadaki final sıralaması")
     )
 
     class Meta:
@@ -348,20 +349,16 @@ def competition_participation_post_save_handler(sender, instance, created, **kwa
     if created:
         competition = instance.competition
         participant = instance.participant
-
         first_round = competition.rounds.order_by("round_number").first()
         if not first_round:
             return
-
         groups_in_first_round = first_round.groups.all()
         if not groups_in_first_round.exists():
             return
-
         selected_group = min(
             groups_in_first_round,
             key=lambda g: g.round_participations.count()
         )
-
         RoundParticipation.objects.get_or_create(
             participant=participant,
             round=first_round,
@@ -377,9 +374,7 @@ def check_group_capacity(sender, instance, **kwargs):
     group = instance.group
     if not group:
         return
-
     current_count = group.round_participations.count()
     new_record = instance.pk is None
-
     if new_record and current_count >= group.max_participants:
         raise ValidationError("Bu grup dolu! Lütfen başka bir gruba ekleyin.")

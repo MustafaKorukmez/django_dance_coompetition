@@ -1,17 +1,10 @@
 from django.shortcuts import render, get_object_or_404
-from .models import Round, Group
+from .models import Competition
 
-def round_list_view(request):
-    """
-    Tüm turların listesini gösteren örnek view.
-    """
-    rounds = Round.objects.select_related('competition').all()
-    return render(request, 'competitions/round_list.html', {"rounds": rounds})
-
-
-def group_detail_view(request, group_id):
-    """
-    Belirli bir grubun detaylarını gösteren örnek view.
-    """
-    group = get_object_or_404(Group.objects.select_related('round'), pk=group_id)
-    return render(request, 'competitions/group_detail.html', {"group": group})
+def final_results_view(request, competition_id):
+    competition = get_object_or_404(Competition, id=competition_id)
+    final_results = competition.get_final_results()
+    return render(request, 'competition/final_results.html', {
+        'competition': competition,
+        'final_results': final_results,
+    })

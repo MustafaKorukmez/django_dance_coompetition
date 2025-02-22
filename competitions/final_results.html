@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h1>{{ competition.name }} - Final Sonuçları</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>Sıra</th>
+        <th>Katılımcı</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for cp in final_results %}
+      <tr>
+        <td>{{ cp.final_position }}</td>
+        <td>{{ cp.participant.full_name }}</td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="2">Final sonuçları henüz hesaplanmamış.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}
