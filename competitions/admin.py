@@ -68,7 +68,7 @@ class CompetitionAdmin(admin.ModelAdmin):
         }),
     )
 
-    actions = ["mark_as_canceled"]
+    actions = ["mark_as_canceled", "calculate_final_positions"]
 
     def mark_as_canceled(self, request, queryset):
         """
@@ -77,6 +77,46 @@ class CompetitionAdmin(admin.ModelAdmin):
         updated = queryset.update(status="canceled")
         self.message_user(request, f"{updated} yarışma iptal edildi.")
     mark_as_canceled.short_description = "Seçili yarışmaları İptal Et"
+
+    def calculate_final_positions(self, request, queryset):
+        """
+        Seçili yarışmaların final turundaki (is_last_round=True) katılımcılarının final sıralamasını hesaplar.
+        
+        İşlem adımları:
+          1. Yarışmanın final turu bulunur.
+          2. Final turundaki tüm RoundParticipation kayıtları alınır.
+          3. Her kaydın Score'larından ortalama sıralama (ranking) hesaplanır.
+             (Score kaydı yoksa, ortalama değer olarak yüksek bir değer atanır.)
+          4. Ortalama değere göre sıralama yapılır; en düşük ortalamaya sahip olan 1. sırayı alır.
+          5. Katılımcının final_position alanı güncellenir.
+        """
+        for competition in queryset:
+            final_round = competition.rounds.filter(is_last_round=True).first()
+            if not final_round:
+                self.message_user(request, f"{competition} için final turu bulunamadı.", level="error")
+                continue
+
+            participations = list(final_round.round_participations.all())
+            if not participations:
+                self.message_user(request, f"{competition} için final katılımcısı bulunamadı.", level="error")
+                continue
+
+            ranking_list = []
+            for rp in participations:
+                scores = rp.scores.all()
+                if scores.exists():
+                    avg_ranking = sum(score.ranking for score in scores) / scores.count()
+                else:
+                    avg_ranking = 9999  # Oy girilmemişse en kötü sıralama varsayılır.
+                ranking_list.append((rp, avg_ranking))
+
+            # Ortalama sıralamaya göre artan sırada düzenle (en düşük en iyi)
+            ranking_list.sort(key=lambda x: x[1])
+            for pos, (rp, avg) in enumerate(ranking_list, start=1):
+                rp.participant.final_position = pos
+                rp.participant.save()
+            self.message_user(request, f"{competition} için final sıralaması başarıyla güncellendi.")
+    calculate_final_positions.short_description = "Final sıralamasını hesapla ve güncelle"
 
 
 @admin.register(Round)
