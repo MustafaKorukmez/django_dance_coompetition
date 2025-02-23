@@ -90,3 +90,21 @@ class RoundParticipationSerializer(serializers.ModelSerializer):
             except Score.DoesNotExist:
                 return None
         return None
+
+
+from rest_framework import serializers
+from .models import Round
+
+class RoundSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Round
+        fields = [
+            'id',
+            'round_number',
+            'round_name',
+            'group_count',
+            'pass_count',
+            'is_last_round',
+            'created_at',
+            'updated_at',
+        ]

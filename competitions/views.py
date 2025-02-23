@@ -130,3 +130,18 @@ class GroupParticipantsListView(generics.ListAPIView):
     def get_queryset(self):
         group_id = self.kwargs['group_id']
         return RoundParticipation.objects.filter(group_id=group_id)
+
+
+from rest_framework import generics
+from .models import Round
+from .serializers import RoundSerializer
+
+class CompetitionRoundsListView(generics.ListAPIView):
+    """
+    Verilen yarışma ID'sine ait tüm turları listeler.
+    """
+    serializer_class = RoundSerializer
+
+    def get_queryset(self):
+        competition_id = self.kwargs.get('competition_id')
+        return Round.objects.filter(competition_id=competition_id)
