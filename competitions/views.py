@@ -14,3 +14,50 @@ class CreateScoreView(generics.CreateAPIView):
         if not self.request.user.groups.filter(name='jury').exists():
             raise PermissionDenied("Bu işlem için jüri yetkiniz yok.")
         serializer.save(jury=self.request.user)
+
+
+from rest_framework import generics
+from .models import RoundParticipation
+from .serializers import RoundParticipationSerializer
+
+class GroupParticipantsListView(generics.ListAPIView):
+    serializer_class = RoundParticipationSerializer
+
+    def get_queryset(self):
+        group_id = self.kwargs['group_id']
+        return RoundParticipation.objects.filter(group_id=group_id)
+
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from .models import RoundParticipation
+
+class GroupRankParticipantsView(APIView):
+    def get(self, request, group_id):
+        participations = RoundParticipation.objects.filter(group_id=group_id)
+        ranking_list = []
+
+        # Her katılımcı için ortalama puanı hesapla
+        for rp in participations:
+            scores = rp.scores.all()
+            if scores.exists():
+                avg_ranking = sum(score.ranking for score in scores) / scores.count()
+            else:
+                # Eğer oy yoksa çok yüksek bir değer atayarak listenin sonuna yerleştirelim
+                avg_ranking = 9999
+            ranking_list.append({'rp': rp, 'avg_ranking': avg_ranking})
+
+        # Ortalamaya göre artan sırada (en düşük en iyi) sırala
+        ranking_list.sort(key=lambda x: x['avg_ranking'])
+
+        response_data = []
+        for pos, item in enumerate(ranking_list, start=1):
+            rp = item['rp']
+            response_data.append({
+                'position': pos,
+                'participant_id': rp.participant.id,
+                'participant_full_name': rp.participant.full_name,
+                'average_ranking': item['avg_ranking']
+            })
+
+        return Response(response_data)

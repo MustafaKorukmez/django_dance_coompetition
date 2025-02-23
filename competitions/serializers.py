@@ -35,3 +35,20 @@ class ScoreSerializer(serializers.ModelSerializer):
         request = self.context.get('request')
         validated_data['jury'] = request.user
         return super().create(validated_data)
+    
+from rest_framework import serializers
+from .models import RoundParticipation
+
+class RoundParticipationSerializer(serializers.ModelSerializer):
+    participant_full_name = serializers.CharField(source='participant.full_name', read_only=True)
+    average_ranking = serializers.SerializerMethodField()
+
+    class Meta:
+        model = RoundParticipation
+        fields = ['id', 'participant', 'participant_full_name', 'group', 'order_in_group', 'average_ranking']
+
+    def get_average_ranking(self, obj):
+        scores = obj.scores.all()
+        if scores.exists():
+            return sum(score.ranking for score in scores) / scores.count()
+        return None
