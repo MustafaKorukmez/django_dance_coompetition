@@ -37,6 +37,7 @@ class Competition(BaseTimestampedModel):
     """
     Bir dans yarışması.
     Katılımcılar bu modele doğrudan değil, CompetitionParticipation üzerinden bağlanır.
+    Ayrıca, jüri üyeleri (User) isteğe bağlı olarak bu yarışmaya atanabilir.
     """
     name = models.CharField(_("Yarışma Adı"), max_length=200, db_index=True)
     style = models.CharField(_("Dans Tarzı"), max_length=100, blank=True)
@@ -52,6 +53,13 @@ class Competition(BaseTimestampedModel):
         help_text=_("Yarışmanın kaç turdan oluşacağını belirtir.")
     )
     description = models.TextField(_("Açıklama"), blank=True)
+    # İsteğe bağlı: Yarışmaya atanacak jüri üyeleri.
+    juries = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        related_name="competitions_as_jury",
+        verbose_name=_("Jüri Üyeleri"),
+        blank=True
+    )
 
     def __str__(self):
         return f"{self.name} ({self.get_status_display()})"
@@ -64,7 +72,6 @@ class Competition(BaseTimestampedModel):
         from_round = self.rounds.filter(round_number=from_round_number).first()
         if not from_round:
             return
-        
         to_round_number = from_round_number + 1
         to_round = self.rounds.filter(round_number=to_round_number).first()
         if not to_round:
@@ -235,7 +242,7 @@ class CompetitionParticipation(BaseTimestampedModel):
 
 
 # -----------------------------------
-# 5) ROUND PARTICIPATION, JURY, SCORE
+# 5) ROUND PARTICIPATION, SCORE
 # -----------------------------------
 
 class RoundParticipation(BaseTimestampedModel):
@@ -280,24 +287,13 @@ class RoundParticipation(BaseTimestampedModel):
         return f"{self.participant} - {self.round} - {self.group}"
 
 
-class Jury(BaseTimestampedModel):
-    """
-    Jüri bilgisi.
-    """
-    full_name = models.CharField(_("Jüri Ad Soyad"), max_length=150)
-    email = models.EmailField(_("E-Posta"), unique=True)
-    active = models.BooleanField(_("Aktif Jüri"), default=True)
-
-    def __str__(self):
-        return f"Jüri: {self.full_name}"
-
-
 class Score(BaseTimestampedModel):
     """
     Jürinin RoundParticipation'a verdiği puan/sıralama.
+    Artık jury, yerleşik User modeline referans verir.
     """
     jury = models.ForeignKey(
-        Jury,
+        settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="scores",
         verbose_name=_("Jüri")

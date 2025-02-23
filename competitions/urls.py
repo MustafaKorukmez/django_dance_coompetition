@@ -1,6 +1,8 @@
 from django.urls import path
-from .views import final_results_view
+from .views import CreateScoreView
+from rest_framework.authtoken.views import obtain_auth_token
 
 urlpatterns = [
-    path('competition/<int:competition_id>/final-results/', final_results_view, name='final_results'),
+    path('api/scores/', CreateScoreView.as_view(), name='create_score'),
+    path('api-token-auth/', obtain_auth_token, name='api_token_auth'),
 ]

@@ -1,10 +1,16 @@
-from django.shortcuts import render, get_object_or_404
-from .models import Competition
+# views.py
+from rest_framework import generics, permissions
+from rest_framework.exceptions import PermissionDenied
+from .models import Score
+from .serializers import ScoreSerializer
 
-def final_results_view(request, competition_id):
-    competition = get_object_or_404(Competition, id=competition_id)
-    final_results = competition.get_final_results()
-    return render(request, 'competition/final_results.html', {
-        'competition': competition,
-        'final_results': final_results,
-    })
+class CreateScoreView(generics.CreateAPIView):
+    queryset = Score.objects.all()
+    serializer_class = ScoreSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def perform_create(self, serializer):
+        # Eğer kullanıcı jüri grubunda değilse, oy veremez.
+        if not self.request.user.groups.filter(name='jury').exists():
+            raise PermissionDenied("Bu işlem için jüri yetkiniz yok.")
+        serializer.save(jury=self.request.user)

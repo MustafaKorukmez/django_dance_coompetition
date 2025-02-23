@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="c2554636-2022-471b-ba12-bf4d6d8f47b3" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/competitions/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/competitions/admin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/competitions/migrations/0001_initial.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/competitions/migrations/0002_alter_competition_options_alter_contestant_options_and_more.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/competitions/migrations/0003_remove_competition_round_details.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/competitions/migrations/0004_judge_password_stage_contestants_to_next_stage.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/competitions/migrations/0005_alter_stage_contestants_to_next_stage.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/competitions/migrations/0006_stage_is_completed_alter_stage_stage_number.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/competitions/migrations/0007_remove_stage_is_completed.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/competitions/migrations/0008_stage_is_grouped.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/competitions/migrations/0009_alter_ranking_unique_together.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/competitions/migrations/0010_stage_is_finished.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/competitions/migrations/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/competitions/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/competitions/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/competitions/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/competitions/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/competitions/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/competitions/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/readme.md" beforeDir="false" afterPath="$PROJECT_DIR$/readme.md" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;MustafaKorukmez&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;git@github.com:MustafaKorukmez/django_dance_coompetition.git&quot;,
+    &quot;accountId&quot;: &quot;ba548fef-dae9-4b32-bfc3-f07058e8646f&quot;
+  }
+}</component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 8
+}</component>
+  <component name="ProjectId" id="2tGyQnqQMi1Rf1SQVW1Pwqce8Vm" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "dart.analysis.tool.window.visible": "false",
+    "git-widget-placeholder": "main",
+    "last_opened_file_path": "/Users/mustafakorukmez/Desktop/Projects/django_dance_competition/dance_competition",
+    "settings.editor.selected.configurable": "preferences.pluginManager"
+  }
+}]]></component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-python-sdk-fb887030ada0-aa17d162503b-com.jetbrains.pycharm.community.sharedIndexes.bundled-PC-243.21565.199" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="c2554636-2022-471b-ba12-bf4d6d8f47b3" name="Changes" comment="" />
+      <created>1739992691226</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1739992691226</updated>
+    </task>
+    <servers />
+  </component>
+</project>

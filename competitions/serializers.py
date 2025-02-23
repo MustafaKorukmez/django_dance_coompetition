@@ -1,3 +1,4 @@
+'''
 from rest_framework import serializers
 from .models import Group, Contestant, Ranking
 
@@ -18,3 +19,19 @@ class RankingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ranking
         fields = ['group', 'judge', 'rank']
+'''
+# serializers.py
+from rest_framework import serializers
+from .models import Score
+
+class ScoreSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Score
+        fields = ['id', 'round_participation', 'ranking']
+        read_only_fields = ['id']
+
+    def create(self, validated_data):
+        # İstek yapan kullanıcıyı jüri olarak ata.
+        request = self.context.get('request')
+        validated_data['jury'] = request.user
+        return super().create(validated_data)

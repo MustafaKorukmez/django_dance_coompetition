@@ -6,7 +6,6 @@ from .models import (
     Participant,
     CompetitionParticipation,
     RoundParticipation,
-    Jury,
     Score,
 )
 
@@ -57,8 +56,9 @@ class CompetitionAdmin(admin.ModelAdmin):
     list_filter = ("status", "style", "created_at", "updated_at")
     search_fields = ("name", "style")
     readonly_fields = ("created_at", "updated_at")
+    filter_horizontal = ("juries",)  # ManyToMany alanı: jüri üyeleri (User)
     fieldsets = (
-        ("Genel Bilgiler", {"fields": ("name", "style", "status", "total_rounds", "description")}),
+        ("Genel Bilgiler", {"fields": ("name", "style", "status", "total_rounds", "description", "juries")}),
         ("Tarih Bilgileri", {"fields": ("created_at", "updated_at")}),
     )
     actions = ["mark_as_canceled", "calculate_final_positions"]
@@ -188,21 +188,6 @@ class RoundParticipationAdmin(admin.ModelAdmin):
     )
 
 
-@admin.register(Jury)
-class JuryAdmin(admin.ModelAdmin):
-    """
-    Jüri bilgisi.
-    """
-    list_display = ("full_name", "email", "active", "created_at", "updated_at")
-    list_filter = ("active", "created_at", "updated_at")
-    search_fields = ("full_name", "email")
-    readonly_fields = ("created_at", "updated_at")
-    fieldsets = (
-        ("Jüri Bilgisi", {"fields": ("full_name", "email", "active")}),
-        ("Tarih Bilgileri", {"fields": ("created_at", "updated_at")}),
-    )
-
-
 @admin.register(Score)
 class ScoreAdmin(admin.ModelAdmin):
     """
@@ -210,7 +195,7 @@ class ScoreAdmin(admin.ModelAdmin):
     """
     list_display = ("jury", "round_participation", "ranking", "created_at", "updated_at")
     list_filter = ("jury", "round_participation__round__competition", "created_at", "updated_at")
-    search_fields = ("jury__full_name", "round_participation__participant__full_name")
+    search_fields = ("jury__username", "round_participation__participant__full_name")
     readonly_fields = ("created_at", "updated_at")
     fieldsets = (
         ("Oy Bilgisi", {"fields": ("jury", "round_participation", "ranking")}),
