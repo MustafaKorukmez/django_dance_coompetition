@@ -145,3 +145,17 @@ class CompetitionRoundsListView(generics.ListAPIView):
     def get_queryset(self):
         competition_id = self.kwargs.get('competition_id')
         return Round.objects.filter(competition_id=competition_id)
+
+from rest_framework import generics
+from .models import Competition
+from .serializers import CompetitionListSerializer
+
+class ActiveCompetitionsListView(generics.ListAPIView):
+    """
+    Sadece aktif yarışmaları (status='active') listeleyen API.
+    Yalnızca yarışma isimleri ve ID'leri döner.
+    """
+    serializer_class = CompetitionListSerializer
+
+    def get_queryset(self):
+        return Competition.objects.filter(status='active')

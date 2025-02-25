@@ -108,3 +108,12 @@ class RoundSerializer(serializers.ModelSerializer):
             'created_at',
             'updated_at',
         ]
+
+from rest_framework import serializers
+from .models import Competition
+
+class CompetitionListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Competition
+        fields = ['id', 'name']
+
